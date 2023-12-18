@@ -1,19 +1,18 @@
 import gym
 import random
-import numpy as np
 from numpy import *
+import numpy as np
 import pandas as pd
-import math
-from statistics import median
 import matplotlib.pyplot as plt
-import matplotlib
+
+
 
 from scipy import signal
 
 env_space = gym.make('LunarLander-v2')
 env_space.reset()
 env_space.close()
-def check_multiple_combinations(populations=[],seletion_strategies=[],generation=10):
+def check_multiple_combinations(populations=[],seletion_strategies=[],generation=10,path=""):
 
     df=pd.DataFrame()
     for po in populations:
@@ -22,9 +21,9 @@ def check_multiple_combinations(populations=[],seletion_strategies=[],generation
             env_space.reset()
             print(f"---------strategy={strategy},------po={po}")
             agent=Agent(generations=generation,population= po,strategy=strategy)
-            best_rewards=agent.optimize_agent()
+            best_rewards=agent.optimize_agent(weight_path=path)
             tdf=pd.DataFrame(best_rewards,columns=[f"{po}-{strategy}"],)
-            df=pd.concat([df,tdf])
+            df=pd.concat([df,tdf],axis=1)
             df.to_csv("gen_combinations.csv",)
             env_space.close()
 
@@ -325,8 +324,8 @@ class Agent():
                 np.save('Lunar_BEST2', self.pop_gene[self.pop_award.index(max(self.pop_award))])
                 self.prev = max(self.pop_award)
             self.i += 1
-            print('[Generation: %3d] [current record:%5d]  [Median Score:%5d] [Top Score: %3d] [History: %3d]' % (
-                self.i, round(self.current_award, 2), round(np.median(self.PID), 2), np.amax(self.pop_award),self. prev))
+            print('[Generation: %3d]  [Top avg reward in current generation: %3d] [Past Max reward: %3d]' % (
+                self.i, np.amax(self.pop_award),self. prev))
             if self.current_award > 320 or self.i >self.generations:
                 break
         return self.best_awards_gen
@@ -381,7 +380,7 @@ class Agent():
 
 
 
-check_multiple_combinations([40,80,160,],["rr","greedy"],100)
+
 # for gen in range(generations):
 #agent=Agent(generations=10)
 #path=""
@@ -390,6 +389,7 @@ check_multiple_combinations([40,80,160,],["rr","greedy"],100)
 #env_space.close()
 #agent.test_agent(path,10,)
 #env_space.close()
+check_multiple_combinations([300],["greedy"],2000,path="")
 
 
 
